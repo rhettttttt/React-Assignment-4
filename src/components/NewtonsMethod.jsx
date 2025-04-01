@@ -1,56 +1,57 @@
-import React, { useState } from "react";
+import { useState } from "react";
 
-const NewtonsMethod = () => {
-    const [guess, setGuess] = useState("");
-    const [approximation, setApproximation] = useState("");
+function NewtonFormula() {
+    const [g, setG] = useState();
+    const [result, setResult] = useState("");
 
-    const newtonsMethod = (
-        initialGuess,
-        tolerance = 1e-7,
-        maxIterations = 100
-    ) => {
-        const f = (x) => x ** 4 - 6 * x ** 3 + 13 * x ** 2 - 18 * x + 7;
-        const fPrime = (x) => 4 * x ** 3 - 18 * x ** 2 + 26 * x - 18;
-        let x = initialGuess;
-        for (let i = 0; i < maxIterations; i++) {
-            const fx = f(x);
-            const fpx = fPrime(x);
-            if (Math.abs(fpx) < tolerance) break;
-            const nextX = x - fx / fpx;
-            if (Math.abs(nextX - x) < tolerance) return nextX;
-            x = nextX;
-        }
-        return x;
-    };
-
-    const calculateRoot = (e) => {
+    function newtonFormula(e) {
         e.preventDefault();
-        const initialGuess = parseFloat(guess) || 0;
-        const root = newtonsMethod(initialGuess);
-        setApproximation(root.toFixed(4));
-    };
+
+        let currentGuess = parseFloat(g);
+        const func = [6, -13, -18, 7, 6];
+        const dFunc = [24, -39, -36, 7];
+        const tolerance = 1e-8;
+        const maxIterations = 100;
+
+        for (let i = 0; i < maxIterations; i++) {
+            let funcValue = 0,
+                dFuncValue = 0;
+
+            func.forEach((coef, idx) => {
+                funcValue += coef * currentGuess ** (func.length - idx - 1);
+                if (idx < dFunc.length) {
+                    dFuncValue +=
+                        dFunc[idx] * currentGuess ** (dFunc.length - idx - 1);
+                }
+            });
+
+            if (Math.abs(funcValue) < tolerance) {
+                break;
+            }
+
+            currentGuess -= funcValue / dFuncValue;
+        }
+
+        setResult(currentGuess.toFixed(2));
+    }
 
     return (
-        <form onSubmit={calculateRoot}>
-            <h1>Newton's Method</h1>
-            <label htmlFor="newton-guess">Root Guess:</label>
+        <form onSubmit={newtonFormula}>
+            <h1>Newton's Formula</h1>
+            <label>Root Guess:</label>
             <input
                 type="number"
-                id="newton-guess"
-                value={guess}
-                onChange={(e) => setGuess(e.target.value)}
+                value={g}
+                onChange={(e) => setG(e.target.value)}
                 required
             />
-            <label htmlFor="newton-result">Approximation:</label>
-            <input
-                type="text"
-                id="newton-result"
-                value={approximation}
-                readOnly
-            />
+
+            <label>Root Approximation (Result):</label>
+            <input type="text" value={result} readOnly />
+
             <input type="submit" value="Calculate" />
         </form>
     );
-};
+}
 
-export default NewtonsMethod;
+export default NewtonFormula;
